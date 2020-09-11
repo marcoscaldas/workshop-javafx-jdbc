@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableView;
 
 
 
@@ -23,6 +24,8 @@ public class Main extends Application {
 		
 		scrollPane.setFitToHeight(true);  // para alinhar o scroll com a tela
 		scrollPane.setFitToWidth(true);
+		
+		
 		
 		mainScene = new Scene(scrollPane);
 		primaryStage.setScene(mainScene);
