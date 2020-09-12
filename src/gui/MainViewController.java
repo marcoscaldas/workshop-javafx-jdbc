@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import java.util.function.Consumer;
+
 import application.Main;
 import gui.util.Alerts;
 import javafx.fxml.FXML;
@@ -34,12 +36,15 @@ public class MainViewController implements Initializable{
 		System.out.println("onMenuItemSellerAction");
 	}
 	@FXML
-	public void onMenuItemDepartment() {
-		loadView2("/gui/DepartmentList.fxml");
+	public void onMenuItemDepartmentAction() {
+		loadView("/gui/DepartmentList.fxml",(DepartmentListController controller) -> {
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
+		});
 	}
 	@FXML
 	public void onMenuItemAbout() {
-		loadView("/gui/about.fxml");
+		loadView("/gui/about.fxml", x -> {});
 	}
 	
 
@@ -47,31 +52,8 @@ public class MainViewController implements Initializable{
 	public void initialize(URL url, ResourceBundle rb) {		
 	}
 	
-	
-	private synchronized void loadView(String absoluteName) { // sincronizar para que o processamento nao seja parado no multread
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));	
-			VBox newVbox = loader.load();
-			
-			Scene mainScene = Main.getMainScene();
-			VBox mainVbox =(VBox) ((ScrollPane) mainScene.getRoot()).getContent(); // o root pega o primeiro elemento da view
-			
-			Node mainMenu = mainVbox.getChildren().get(0);
-			mainVbox.getChildren().clear();
-			mainVbox.getChildren().add(mainMenu);
-			mainVbox.getChildren().addAll(newVbox.getChildren());
-						
-		}
-		catch (IOException e) {
-			Alerts.showAlert("IO Exception", "Error loagind view", e.getMessage(), AlertType.ERROR);
-		}
-	}
-
-	
-	
-	
-	
-	private synchronized void loadView2(String absoluteName) { // sincronizar para que o processamento nao seja parado no multread
+	                                                        // colocar o <T> na frente do void 
+	private synchronized <T> void loadView(String absoluteName, Consumer<T> initializingAction) { // sincronizar para que o processamento nao seja parado no multread
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));	
 			VBox newVbox = loader.load();
@@ -84,21 +66,12 @@ public class MainViewController implements Initializable{
 			mainVbox.getChildren().add(mainMenu);
 			mainVbox.getChildren().addAll(newVbox.getChildren());
 			
-			DepartmentListController controller = loader.getController();
-			controller.setDepartmentService(new DepartmentService());
-			controller.updateTableView();
-			
+			T controller = loader.getController();
+			initializingAction.accept(controller); 			
 		}
 		catch (IOException e) {
 			Alerts.showAlert("IO Exception", "Error loagind view", e.getMessage(), AlertType.ERROR);
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
 	
 }
